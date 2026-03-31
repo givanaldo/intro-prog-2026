@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Números Binários - Desplugada</title>
+    <style>
+        /* --- ESTILOS GLOBAIS --- */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        /* --- ESTILOS DA CAIXA DE DESAFIO --- */
+        /* Criamos uma caixa destacada para chamar a atenção para o desafio */
+        .challenge-box {
+            background-color: #fff3cd;
+            border: 2px dashed #ffc107;
+            border-radius: 10px;
+            padding: 15px 30px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .challenge-title {
+            font-size: 24px;
+            color: #856404;
+            margin: 0 0 15px 0;
+        }
+
+        /* Classe que será adicionada pelo JavaScript quando os alunos acertarem */
+        .success {
+            color: #155724 !important;
+            font-weight: bold;
+        }
+
+        /* --- ESTILOS DOS CARTÕES --- */
+        .cards-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            width: 150px;
+            height: 220px;
+            border: 3px solid #333;
+            border-radius: 10px;
+            cursor: pointer; 
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            justify-content: center;
+            padding: 10px;
+            box-sizing: border-box;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .card:active {
+            transform: scale(0.95);
+        }
+
+        .card.up {
+            background-color: #ffffff;
+        }
+
+        .card.down {
+            background-color: #555555;
+            border-color: #222;
+        }
+
+        .dot {
+            width: 20px;
+            height: 20px;
+            background-color: #000;
+            border-radius: 50%;
+            margin: 5px;
+        }
+
+        .card.down .dot {
+            display: none;
+        }
+
+        /* --- ESTILOS DO PLACAR E BOTÕES --- */
+        .scoreboard {
+            font-size: 32px;
+            font-weight: bold;
+            color: #222;
+            background: #fff;
+            display: inline-block;
+            padding: 20px 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            min-width: 300px; 
+            min-height: 100px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .binary-text {
+            color: #0066cc;
+            font-family: monospace;
+            font-size: 40px;
+        }
+
+        .btn {
+            background-color: #0066cc;
+            color: white;
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #004c99;
+        }
+
+        .btn-challenge {
+            background-color: #ffc107;
+            color: #333;
+        }
+        
+        .btn-challenge:hover {
+            background-color: #e0a800;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Atividade de Números Binários</h1>
+    
+    <div class="challenge-box">
+        <h2 class="challenge-title">Desafio: Forme o número <span id="challenge-number">?</span></h2>
+        <button class="btn btn-challenge" onclick="gerarDesafio()">Sortear Novo Desafio</button>
+    </div>
+
+    <div class="cards-container" id="cards-container"></div>
+
+    <div>
+        <button id="toggle-btn" class="btn" onclick="toggleResult()">Mostrar Resultado</button>
+    </div>
+
+    <div class="scoreboard">
+        <div id="result-content" class="hidden">
+            <div>Total Decimal: <span id="decimal-total">0</span></div>
+            <div style="margin-top: 15px;">Binário: <span id="binary-total" class="binary-text">00000</span></div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURAÇÃO INICIAL ---
+        const cardValues = [16, 8, 4, 2, 1];
+        let cardStates = [false, false, false, false, false];
+        let isResultVisible = false; 
+        
+        // Nova variável para guardar o número sorteado
+        let numeroDesafioAtual = 0; 
+
+        const container = document.getElementById('cards-container');
+        const decimalSpan = document.getElementById('decimal-total');
+        const binarySpan = document.getElementById('binary-total');
+        const btnToggle = document.getElementById('toggle-btn');
+        const resultContent = document.getElementById('result-content');
+        
+        // Referência para o texto do número desafio
+        const challengeNumberSpan = document.getElementById('challenge-number');
+
+        // --- 2. CRIAÇÃO DOS CARTÕES ---
+        function initCards() {
+            container.innerHTML = ''; 
+            for (let i = 0; i < cardValues.length; i++) {
+                let cardDiv = document.createElement('div');
+                cardDiv.className = 'card down';
+                cardDiv.onclick = () => toggleCard(i);
+
+                for (let j = 0; j < cardValues[i]; j++) {
+                    let dot = document.createElement('div');
+                    dot.className = 'dot';
+                    cardDiv.appendChild(dot);
+                }
+                container.appendChild(cardDiv);
+            }
+            updateScoreboard(); 
+        }
+
+        // --- 3. VIRAR O CARTÃO ---
+        function toggleCard(index) {
+            cardStates[index] = !cardStates[index]; 
+            const cardElements = container.children;
+            if (cardStates[index]) {
+                cardElements[index].className = 'card up';
+            } else {
+                cardElements[index].className = 'card down';
+            }
+            // Toda vez que vira um cartão, atualiza o placar (e verifica se acertou o desafio)
+            updateScoreboard();
+        }
+
+        // --- 4. ATUALIZAR PLACAR E VERIFICAR DESAFIO ---
+        function updateScoreboard() {
+            let decimalTotal = 0;
+            let binaryString = "";
+
+            for (let i = 0; i < cardStates.length; i++) {
+                if (cardStates[i]) {
+                    decimalTotal += cardValues[i];
+                    binaryString += "1";
+                } else {
+                    binaryString += "0";
+                }
+            }
+            decimalSpan.textContent = decimalTotal;
+            binarySpan.textContent = binaryString;
+
+            // NOVA LÓGICA: Verifica se o total bate com o número do desafio
+            if (numeroDesafioAtual > 0) {
+                if (decimalTotal === numeroDesafioAtual) {
+                    // Acertou! Muda a cor e adiciona um texto de comemoração
+                    challengeNumberSpan.classList.add('success');
+                    challengeNumberSpan.textContent = numeroDesafioAtual + " - Correto! 🎉";
+                } else {
+                    // Ainda não acertou, remove a cor de sucesso caso estivesse lá
+                    challengeNumberSpan.classList.remove('success');
+                    challengeNumberSpan.textContent = numeroDesafioAtual;
+                }
+            }
+        }
+
+        // --- 5. MOSTRAR/OCULTAR RESULTADO ---
+        function toggleResult() {
+            isResultVisible = !isResultVisible; 
+            if (isResultVisible) {
+                resultContent.classList.remove('hidden');
+                btnToggle.textContent = 'Ocultar Resultado';
+            } else {
+                resultContent.classList.add('hidden');
+                btnToggle.textContent = 'Mostrar Resultado';
+            }
+        }
+
+        // --- 6. NOVA FUNÇÃO: GERAR DESAFIO ---
+        /*
+         * Essa função sorteia um número aleatório de 1 a 31.
+         * Math.random() gera um decimal entre 0 e 0.999...
+         * Multiplicamos por 31 (vai de 0 a 30.999...)
+         * Math.floor() arredonda para baixo (fica de 0 a 30)
+         * Somamos 1 (fica de 1 a 31)
+         */
+        function gerarDesafio() {
+            numeroDesafioAtual = Math.floor(Math.random() * 31) + 1;
+            
+            // Tira a cor de sucesso (caso o aluno tivesse acertado o desafio anterior)
+            challengeNumberSpan.classList.remove('success');
+            
+            // Mostra o novo número na tela
+            challengeNumberSpan.textContent = numeroDesafioAtual;
+            
+            // Roda a verificação de placar para o caso (raro) de os cartões já estarem na posição certa
+            updateScoreboard();
+        }
+
+        // Inicia a aplicação
+        initCards();
+    </script>
+</body>
+</html>
