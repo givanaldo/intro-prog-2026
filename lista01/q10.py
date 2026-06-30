@@ -10,9 +10,9 @@ anos_fumados = int(input('Anos que fumou: '))
 total_cigarros = anos_fumados * 365 * cigarros_por_dia
 dias_perdidos = total_cigarros / 144
 
-print ('Você perdeu aproximadamente %d dias de vida.' % dias_perdidos)
+print (f'Você perdeu aproximadamente {dias_perdidos:.0f} dias de vida.')
 
 # Calcular na forma ano/dias
 anos_fumados = dias_perdidos // 365
 dias_fumados = dias_perdidos % 365
-print ('Perdeu aproximadamente %d ano(s) e %d dia(s)' % (anos_fumados, dias_fumados))
+print (f'Você perdeu aproximadamente {anos_fumados:.0f} ano(s) e {dias_fumados:.0f} dia(s)')
