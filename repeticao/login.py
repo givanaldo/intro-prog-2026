@@ -1,15 +1,14 @@
 login_padrao = "aluno"
 senha_padrao = "ifrn123"
+login = ""
+senha = ""
 
-while
+while login != login_padrao or senha != senha_padrao:
+    login = input("Login: ")
+    senha = input("Senha: ")
+    if login != login_padrao or senha != senha_padrao:
+        print("Acesso inválido, tente novamente!")
+    else:
+        print("Acesso liberado!")
 
-
-'''
-login = input("Login: ")
-senha = input("Senha: ")
-
-if login == login_padrao and senha == senha_padrao:
-    print("Acesso liberado. Bem-vindo ao SUAP!")
-else:
-    print("Credenciais inválidas. Acesso bloqueado!")
-'''
+print("Restante do código")
